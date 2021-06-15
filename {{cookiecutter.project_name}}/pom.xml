@@ -1,8 +1,10 @@
+{%- set is_module = cookiecutter.parent_name != 'n' %}
+{%- set not_module = !is_module %}
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    {%- if cookiecutter.parent_name != 'n' %}
+    {%- if is_module %}
     <parent>
         <artifactId>{{ cookiecutter.parent_name }}</artifactId>
         <groupId>com.{{ cookiecutter.company }}</groupId>
@@ -79,15 +81,21 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.11.0</version>
+            <version>3.11.1</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>3.11.0</version>
+            <version>3.11.1</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>junit-jupiter-api</artifactId>
+                    <groupId>org.junit.jupiter</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
     </dependencies>
@@ -102,6 +110,57 @@
         </resources>
 
         <plugins>
+            <!-- Enforce Maven up to version 3.x -->
+            <!-- Required for maven-version-plugin -->
+            <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-enforcer-plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <executions>
+                    <execution>
+                        <id>enforce</id>
+                        <configuration>
+                            <rules>
+                                <!-- Make sure there are no dependency duplicates -->
+                                <banDuplicatePomDependencyVersions />
+                                <!-- Require deps to converge to the same version -->
+                                <dependencyConvergence>
+                                    <!-- Converge snapshotted versions also by comparing jar timestamps -->
+                                    <uniqueVersions>true</uniqueVersions>
+                                </dependencyConvergence>
+                                <!-- Enforce Java version -->
+                                <requireJavaVersion>
+                                    <version>{{ cookiecutter.java_version }}</version>
+                                </requireJavaVersion>
+                                <!-- Required for maven-version-plugin -->
+                                <requireMavenVersion>
+                                    <version>3.0.4</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- https://maven.apache.org/surefire/maven-surefire-plugin/examples/junit-platform.html -->
+            <!-- https://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html -->
+            <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+                <configuration>
+                    <!-- Groups / Categories / Tags to exclude -->
+                    <excludedGroups>integration</excludedGroups>
+                    <!-- Run multiple classes in parallel -->
+                    <parallel>classes</parallel>
+                    <!-- One thread per core -->
+                    <perCoreThreadCount>true</perCoreThreadCount>
+                    <threadCount>1</threadCount>
+                </configuration>
+            </plugin>
             {%- if cookiecutter.is_library == 'y' %}
             <!-- When we're built, don't include our logback.xml -->
             <!-- https://maven.apache.org/plugins/maven-jar-plugin/ -->
@@ -146,43 +205,9 @@
                 </executions>
             </plugin>
             {%- endif %}
-            <!-- Enforce Maven up to version 3.x -->
-            <!-- Required for maven-version-plugin -->
-            <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-enforcer-plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0-M3</version>
-                <executions>
-                    <execution>
-                        <id>enforce</id>
-                        <configuration>
-                            <rules>
-                                <!-- Make sure there are no dependency duplicates -->
-                                <banDuplicatePomDependencyVersions />
-                                <!-- Require deps to converge to the same version -->
-                                <dependencyConvergence>
-                                    <!-- Converge snapshotted versions also by comparing jar timestamps -->
-                                    <uniqueVersions>true</uniqueVersions>
-                                </dependencyConvergence>
-                                <!-- Enforce Java version -->
-                                <requireJavaVersion>
-                                    <version>{{ cookiecutter.java_version }}</version>
-                                </requireJavaVersion>
-                                <!-- Required for maven-version-plugin -->
-                                <requireMavenVersion>
-                                    <version>3.0.4</version>
-                                </requireMavenVersion>
-                            </rules>
-                        </configuration>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
 
+        {%- if not_module %}
         <!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
         <pluginManagement>
             <plugins>
@@ -238,5 +263,55 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        {%- endif %}
     </build>
+
+    {%- if is_publishable_lib == 'y' %}
+    <profiles>
+        <profile>
+            <!-- Use: -P release to generate sources and javadocs -->
+            <!-- https://maven.apache.org/plugin-developers/cookbook/attach-source-javadoc-artifacts.html -->
+            <id>release</id>
+            <build>
+                <plugins>
+                    <!-- Attach source code to our JAR -->
+                    <!-- https://maven.apache.org/plugins/maven-source-plugin/usage.html -->
+                    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-source-plugin -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-javadoc-plugin -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.2.0</version>
+                        <configuration>
+                            <!-- https://stackoverflow.com/questions/39616344/how-to-disable-javadoc-warnings-in-maven-javadoc-plugin -->
+                            <additionalOptions>-Xdoclint:none</additionalOptions>
+                            <additionalJOption>-Xdoclint:none</additionalJOption>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    {%- endif %}
 </project>
