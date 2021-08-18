@@ -22,6 +22,8 @@
         <maven.compiler.source>{{ cookiecutter.java_version }}</maven.compiler.source>
         <maven.compiler.target>{{ cookiecutter.java_version }}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <junit.version>5.7.2</junit.version>
+        <mockito.version>3.11.2</mockito.version>
         <eclipse.version>11.0.0.M2</eclipse.version>
     </properties>
 
@@ -30,7 +32,7 @@
         <dependency>
             <groupId>io.vavr</groupId>
             <artifactId>vavr</artifactId>
-            <version>0.10.3</version>
+            <version>0.10.4</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.eclipse.collections/eclipse-collections -->
         <dependency>
@@ -43,13 +45,13 @@
         <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
-            <version>4.2.3</version>
+            <version>4.4.0</version>
         </dependency>
         <!-- SLF4J via Logback -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
+            <version>1.2.5</version>
         </dependency>
 
         <!-- Testing dependency - adds "Verify" class of asserts for collections -->
@@ -65,7 +67,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.7.2</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- JUnit 5 engine for running tests during maven build -->
@@ -73,7 +75,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.7.2</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- Mockito mocks -->
@@ -81,14 +83,14 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.11.1</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>3.11.1</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
