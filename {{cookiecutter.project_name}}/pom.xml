@@ -1,5 +1,5 @@
 {%- set is_module = cookiecutter.parent_name != 'n' %}
-{%- set not_module = !is_module %}
+{%- set not_module = not is_module %}
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -22,9 +22,8 @@
         <maven.compiler.source>{{ cookiecutter.java_version }}</maven.compiler.source>
         <maven.compiler.target>{{ cookiecutter.java_version }}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>5.7.2</junit.version>
-        <mockito.version>3.11.2</mockito.version>
-        <eclipse.version>11.0.0.M2</eclipse.version>
+        <junit.version>5.8.2</junit.version>
+        <mockito.version>4.3.1</mockito.version>
     </properties>
 
     <dependencies>
@@ -34,24 +33,18 @@
             <artifactId>vavr</artifactId>
             <version>0.10.4</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.eclipse.collections/eclipse-collections -->
-        <dependency>
-            <groupId>org.eclipse.collections</groupId>
-            <artifactId>eclipse-collections</artifactId>
-            <version>${eclipse.version}</version>
-        </dependency>
         <!-- @ParametersAreNonnullByDefault, @Nonnull, @Nullable -->
         <!-- https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-annotations -->
         <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
-            <version>4.4.0</version>
+            <version>4.6.0</version>
         </dependency>
         <!-- SLF4J via Logback -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.5</version>
+            <version>1.2.11</version>
         </dependency>
 
         <!-- Testing dependency - adds "Verify" class of asserts for collections -->
@@ -118,7 +111,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0-M3</version>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <id>enforce</id>
@@ -268,7 +261,7 @@
         {%- endif %}
     </build>
 
-    {%- if is_publishable_lib == 'y' %}
+    {%- if cookiecutter.is_publishable_lib == 'y' %}
     <profiles>
         <profile>
             <!-- Use: -P release to generate sources and javadocs -->

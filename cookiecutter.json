@@ -1,9 +1,9 @@
 {
-    "company": "<-- e.g. com.company",
+    "company": "so for 'com.company' just enter 'company' (we'll do sub-package later)",
     "project_name": "my-project",
     "sub_package": "{{ cookiecutter.project_name.replace('-', '').replace('_', '') }}",
-    "parent_name": "<-- parent artifactId or 'n'",
-    "java_version": [ "1.8", "11", "16" ],
+    "parent_name": "parent artifactId or 'n'",
+    "java_version": [ "1.8", "11", "16", "17" ],
     "is_library": [ "n", "y" ],
     "is_runnable_jar": [ "n", "y" ],
     "is_publishable_lib": [ "n", "y" ]
